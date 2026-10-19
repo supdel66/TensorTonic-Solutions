@@ -1,3 +1,78 @@
+--CASE EXPRESSIONS 
+select 
+job_title_short, salary_year_avg,
+case 
+when salary_year_avg>40 then 'high'
+when salary_year_avg <20 then 'low '
+else 'null' 
+end as category from data_jobs.job_postings_fact where salary_year_avg is not null 
+limit 10;
+
+select job_title,
+case 
+when job_title_short like '%Data%' then 'lol'
+end as category 
+ from data_jobs.job_postings_fact 
+order by random()
+limit 10;
+
+--conditional aggregation 
+select job_title_short, 
+count(*), 
+median ( case when salary_year_avg<100000 then salary_year_avg end ) as med 
+,  
+median ( case when salary_year_avg>100000 then salary_year_avg end ) as high 
+from job_postings_fact where salary_year_avg is not null group by job_title_short;
+
+
+end is necessary for case
+() is for aggregated for individual we dont really do.. 
+
+
+with  salaries as (
+  select 
+  salary_year_avg, salary_hour_avg,
+  case when salary_year_avg is not null then salary_year_avg
+ when salary_hour_avg is not null then salary_hour_avg*2080
+  end as standarda
+  from job_postings_fact where salary_year_avg is not null or salary_hour_avg is not null 
+)
+select standarda,
+case when standarda>25000 then 'gpood'
+else 'bad' end 
+from salaries ;
+
+
+with salaries as (
+select job_title_short, 
+case 
+when salary_year_avg is not null then salary_year_avg
+When salary_hour_avg is not null then salary_hour_avg *2080 
+end as salary_year 
+from job_postings_fact order by random() limit 100
+) 
+select count(*) from salaries where salary_year is null;
+
+
+---standardized slary into bucket 
+with  salaries as (
+  select job_title_short,
+  salary_year_avg, salary_hour_avg,
+  case when salary_year_avg is not null then salary_year_avg
+ when salary_hour_avg is not null then salary_hour_avg*2080
+  end as standarda
+  from job_postings_fact where salary_year_avg is not null or salary_hour_avg is not null 
+)
+select job_title_short, standarda,
+case 
+when standarda<75000 then 'low'
+when standarda>150000 then 'high'
+else 'medium'
+end as salary_bucket from salaries limit 12;
+
+
+
+
 select column_name, data_type from information_schema.columns
 where table_catalog='data_jobs' and table_name='job_postings_fact'
 ;
